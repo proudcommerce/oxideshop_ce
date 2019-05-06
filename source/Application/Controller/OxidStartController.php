@@ -6,7 +6,7 @@
 
 namespace OxidEsales\EshopCommunity\Application\Controller;
 
-use oxRegistry;
+use OxidEsales\Eshop\Core\SystemEventHandler;
 
 /**
  * Encapsulates methods for application initialization.
@@ -65,6 +65,9 @@ class OxidStartController extends \OxidEsales\Eshop\Application\Controller\Front
      */
     public function pageClose()
     {
+        $systemEventHandler = $this->_getSystemEventHandler();
+        $systemEventHandler->onShopEnd();
+
         $mySession = $this->getSession();
 
         if (isset($mySession)) {
@@ -100,7 +103,7 @@ class OxidStartController extends \OxidEsales\Eshop\Application\Controller\Front
     /**
      * Gets system event handler.
      *
-     * @return oxSystemEventHandler
+     * @return SystemEventHandler
      */
     protected function _getSystemEventHandler()
     {

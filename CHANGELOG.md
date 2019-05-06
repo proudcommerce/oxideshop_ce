@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - template source/Application/views/admin/tpl/dynscreen_local.tpl
 - template source/Application/views/admin/tpl/version_checker_result.tpl
 - `sOXIDPHP` parameter in `config.inc.php`
+- `blDoNotDisableModuleOnError` parameter in `config.inc.php`
 - \OxidEsales\EshopCommunity\Core\Exception\ExceptionHandler::writeExceptionToLog
 - \OxidEsales\EshopCommunity\Core\Exception\ExceptionHandler::displayOfflinePage
 - \OxidEsales\EshopCommunity\Core\Exception\ExceptionHandler::setLogFileName
@@ -69,6 +70,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `\OxidEsales\EshopCommunity\Core\Email::setConfig`
 - `\OxidEsales\EshopCommunity\Core\Email::getConfig`
 - `\OxidEsales\EshopCommunity\Core\SystemRequirements::getConfig`
+- `\OxidEsales\EshopCommunity\Core\Module::getConfigBlDoNotDisableModuleOnError`
 
 ### Fixed
 
@@ -79,46 +81,124 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed return type in Basket::getDiscounts [PR-659](https://github.com/OXID-eSales/oxideshop_ce/pull/659)
 - Remove unused variables, decrease complexity [PR-668](https://github.com/OXID-eSales/oxideshop_ce/pull/668)
+- Cleanup return statement from ShopList model constructor [PR-677](https://github.com/OXID-eSales/oxideshop_ce/pull/677)
+- Fix warning if discounts variable is not array [PR-678](https://github.com/OXID-eSales/oxideshop_ce/pull/678)
+- Fix phpdoc types and set consistent returns in BaseController [PR-676](https://github.com/OXID-eSales/oxideshop_ce/pull/676)
+- Fix checkIniSet method in SystemRequirements for php 7.2 [PR-681](https://github.com/OXID-eSales/oxideshop_ce/pull/681)
+- Fixed bug no possibility to sort accessories of articles in backend [#0003609](https://bugs.oxid-esales.com/view.php?id=3609)
 
 ### Added
 - New methods:
   - `OxidEsales\EshopCommunity\Core\Exception\ExceptionToDisplay::getValues` [PR-660](https://github.com/OXID-eSales/oxideshop_ce/pull/660)
   - `OxidEsales\EshopCommunity\Application\Model\Article::getStock` [PR-640](https://github.com/OXID-eSales/oxideshop_ce/pull/640)
+  - `OxidEsales\EshopCommunity\Application\Controller\Admin::sortAccessoriesList()` [#0003609](https://bugs.oxid-esales.com/view.php?id=3609)
+  - `OxidEsales\EshopCommunity\Application\Model\Article::getActionType` 
+  - `OxidEsales\EshopCommunity\Application\Model\Article::getStockStatusOnLoad` 
+  - `OxidEsales\EshopCommunity\Core\Base::dispatchEvent` 
 - Log a warnings for missused db method calls [PR-649](https://github.com/OXID-eSales/oxideshop_ce/pull/649)
 - New blocks:
   - `admin_module_sortlist` in `admin/tpl/module_sortlist.tpl` [PR-534](https://github.com/OXID-eSales/oxideshop_ce/pull/534)
+  - `admin_order_overview_info_items` in `admin/tpl/include/order_info.tpl` [PR-688](https://github.com/OXID-eSales/oxideshop_ce/pull/688/files)
+  - `admin_order_overview_info_sumtotal` in `admin/tpl/include/order_info.tpl` [PR-688](https://github.com/OXID-eSales/oxideshop_ce/pull/688/files)
 - Log missing translations [PR-520](https://github.com/OXID-eSales/oxideshop_ce/pull/520)
 - New features:
   - Reset category filter [0002046](https://bugs.oxid-esales.com/view.php?id=2046)
   - OXID eShop console, which allows to register custom commands for modules and for components via `services.yaml`.
   - New command to activate module.
   - New command to deactivate module.
+  - New parameter in config file to change database connection charset - `dbCharset` [PR-670](https://github.com/OXID-eSales/oxideshop_ce/pull/670)
+
+- Module configuration:
+    - option `activeModules` in table oxconfig in order to determine the currently active modules
+
+- Events:
+    - `\OxidEsales\EshopCommunity\Internal\Module\MetaData\Event\BadMetaDataFoundEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Module\Setup\Event\BeforeModuleDeactivationEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Module\Setup\Event\FinalizingModuleActivationEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Module\Setup\Event\FinalizingModuleDeactivationEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Adapter\Configuration\Event\ShopConfigurationChangedEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Module\ShopModuleSetting\Event\ShopModuleSettingChangedEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\AfterModelDeleteEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\AfterModelInsertEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\AfterModelUpdateEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\AllCookiesRemovedEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\ApplicationExitEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\BasketChangedEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\BeforeHeadersSendEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\BeforeModelDeleteEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\BeforeModelUpdateEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\BeforeSessionStartEvent`
+    - `\OxidEsales\EshopCommunity\Internal\ShopEvents\ViewRenderedEvent`
+    - `\OxidEsales\EshopCommunity\Internal\Theme\Event\ThemeSettingChangedEvent`
+- Configuration options in `config.inc.php`
+    - `passwordHashingAlgorithm` with default value: PASSWORD_BCRYPT
+    - `passwordHashingBcryptCost` with default value: 10
+    - `passwordHashingArgon2MemoryCost` with default value: 1024;
+    - `passwordHashingArgon2TimeCost` with default value: 2;
+    - `passwordHashingArgon2Threads` with default value: 2;
+- Interface:
+    - `\OxidEsales\EshopCommunity\Internal\Password\Bridge\PasswordServiceBridgeInterface`
+- Constants
+    - `\OxidEsales\EshopCommunity\Application\Model\User::USER_COOKIE_SALT`
 
 ### Changed
 - category_main form layout improvements [PR-585](https://github.com/OXID-eSales/oxideshop_ce/pull/585)
 - Split config parameter initialization from application initialization [PR-628](https://github.com/OXID-eSales/oxideshop_ce/pull/628)
 - Increase default quantity of productimages to 12 (from 7) [PR-514](https://github.com/OXID-eSales/oxideshop_ce/pull/514)
 - Make adding template blocks more fast andn reliable [PR-580](https://github.com/OXID-eSales/oxideshop_ce/pull/580)
+- Change email encoding to base64 [0006468](https://bugs.oxid-esales.com/view.php?id=6468) [PR-697](https://github.com/OXID-eSales/oxideshop_ce/pull/697)
 - Support PHP 7.2
+- Modules will not be disabled on class loading errors anymore, Error is just logged [PR-661](https://github.com/OXID-eSales/oxideshop_ce/pull/661)
+- Use facts to calculate CE location [PR-685](https://github.com/OXID-eSales/oxideshop_ce/pull/685)
+- Load SystemRequirements via oxNew [PR-694](https://github.com/OXID-eSales/oxideshop_ce/pull/694)
+- Initialize the session only once [PR-699](https://github.com/OXID-eSales/oxideshop_ce/pull/699)
+- Backwards compatibility break: `\OxidEsales\EshopCommunity\Application\Model\User::_dbLogin` will only called until the user successfully logs in the 
+  first time. Afterwards the password hash will have been recreated and a new authentication mechanism will be used. This 
+  breaks backwards compatibility for modules, which directly override `_dbLogin` or one of the methods in the call stack.
+- Fix typo in ident for help near name/surname in `application/views/admin/tpl/shop_main.tpl` [PR-701](https://github.com/OXID-eSales/oxideshop_ce/pull/701)
+    - Was `HELP_ENERAL_NAME` changed to `HELP_GENERAL_NAME`
 
 ### Removed
 - Removed old not used blAutoSearchOnCat option from shop_config tab [PR-654](https://github.com/OXID-eSales/oxideshop_ce/pull/654)
 - Removed unnecessary class imports [PR-667](https://github.com/OXID-eSales/oxideshop_ce/pull/667)
 - Removed deprecated `\OxidEsales\EshopCommunity\Core\Email::$Version` use `\PHPMailer\PHPMailer\PHPMailer::VERSION` instead
+- The value for the password salt will not be stored in the database column `oxuser.OXPASSSALT` anymore, but in the password hash itself  
 
 ### Deprecated
+- `\OxidEsales\EshopCommunity\Application\Model\User::_dbLogin` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Application\Model\User::_getLoginQuery` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Application\Model\User::_getLoginQueryHashedWithMD5` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Application\Model\User::encodePassword` will no longer be needed and removed completely. Use `PasswordServiceBridgeInterface` instead
+- `\OxidEsales\EshopCommunity\Application\Model\User::formQueryPartForMD5Password` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Application\Model\User::formQueryPartForSha512Password` will no longer be needed and removed completely
 - `\OxidEsales\EshopCommunity\Core\Base::setConfig`
 - `\OxidEsales\EshopCommunity\Core\Base::getConfig`
 - `\OxidEsales\EshopCommunity\Core\Email::$_oConfig`
 - `\OxidEsales\EshopCommunity\Core\Email::setConfig`
 - `\OxidEsales\EshopCommunity\Core\Email::getConfig`
+- `blDoNotDisableModuleOnError` config option
+- `\OxidEsales\EshopCommunity\Core\OpenSSLFunctionalityChecker` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Core\Hasher` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Core\PasswordHasher` will no longer be needed and removed completely. Use `PasswordServiceBridgeInterface` instead
+- `\OxidEsales\EshopCommunity\Core\PasswordSaltGenerator` will no longer be needed and removed completely
+- `\OxidEsales\EshopCommunity\Core\Sha512Hasher` will no longer be needed and removed completely
 
+## [6.3.3] - 2019-04-16
 
-## [6.3.2] - Unreleased
+### Fixed
+- Ensure temp file in tmp directory [PR-683](https://github.com/OXID-eSales/oxideshop_ce/pull/683)
+- Fix warning in inc_error.tpl [PR-690](https://github.com/OXID-eSales/oxideshop_ce/pull/690)
+- Fix url protocol in version tags [PR-696](https://github.com/OXID-eSales/oxideshop_ce/pull/696)
+- Use correct value for backing up the base language in email [PR-692](https://github.com/OXID-eSales/oxideshop_ce/pull/692)
+- Read config parameter by getConfigParam, not by getRequestParam [#0006968](https://bugs.oxid-esales.com/view.php?id=6968) [PR-698](https://github.com/OXID-eSales/oxideshop_ce/pull/698)
+
+## [6.3.2] - 2019-01-22
 
 ### Added
+- Add method SystemEventHandler::onShopEnd() to be called for finishing actions e.g. from ShopControl::pageClose().
 
 ### Changed
+- Call to SystemEventHandler::validateOnline() is now called as finishing action rather than startup.
 
 ### Deprecated
 - `\OxidEsales\EshopCommunity\Core\Email::$Version` This fixes a missing deprecation in PHPMailer, which is the parent 
@@ -128,17 +208,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     familiar with them, as there are also changes in the SMTP and POP3 classes. Please read the 
    [PHPMailer changelog](https://github.com/PHPMailer/PHPMailer/blob/master/changelog.md#version-60-august-28th-2017)  
 
-### Removed
-
 ### Fixed
 - Wrong behaviour from getOrderArticleSelectList when values from selectionlists and variantselections are selected [PR-507](https://github.com/OXID-eSales/oxideshop_ce/pull/507) [0006539](https://bugs.oxid-esales.com/view.php?id=6539)
 - Fix SQL file upload error [Bug #5764](https://bugs.oxid-esales.com/view.php?id=5764)
 - Fixed admin login display in Windows 7 IE11 [PR-671](https://github.com/OXID-eSales/oxideshop_ce/pull/671)
 - Fix content page data of 8th+ language edit [PR-674](https://github.com/OXID-eSales/oxideshop_ce/pull/674)
 - Fix unusable shop after activation of a module with migrated metadata (v2) [PR-663](https://github.com/OXID-eSales/oxideshop_ce/pull/663)
-
-### Security
-
+- Fix issue with shop roles readonly. [Bug 6851](https://bugs.oxid-esales.com/view.php?id=6851) 
 
 ## [6.3.1] - 2018-10-16
 
@@ -246,18 +322,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Use error_404_handler in article list controller in place of outdated 404 handling [PR-643](https://github.com/OXID-eSales/oxideshop_ce/pull/643)
 - Fix indents in config.inc.php.dist [PR-527](https://github.com/OXID-eSales/oxideshop_ce/pull/527)
 
-## [6.2.2] unreleased
-
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
+## [6.2.2] 2019-02-21
 
 ### Fixed
-- Fix issue with shop roles readonly. [Bug 6851](https://bugs.oxid-esales.com/view.php?id=6851) 
+- Fix issue with shop roles readonly. [Bug 6851](https://bugs.oxid-esales.com/view.php?id=6851)
 
 ## [6.2.1] - 2018-07-31
 
@@ -568,9 +636,11 @@ See
 - [OXID eShop v6.0.0 Beta1: Detailed Code Changelog](https://oxidforge.org/en/oxid-eshop-v6-0-0-beta1-detailed-code-changelog.html)
 
 
-[6.3.2]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.3.1...b-6.1.x
+[6.3.3]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.3.2...v6.3.3
+[6.3.2]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.3.1...v6.3.2
 [6.3.1]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.2.1...v6.3.0
+[6.2.2]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.2.1...v6.2.2
 [6.2.1]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.2.0...v6.2.1
 [6.2.0]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/OXID-eSales/oxideshop_ce/compare/v6.0.0...v6.1.0

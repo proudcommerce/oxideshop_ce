@@ -8,7 +8,7 @@ namespace OxidEsales\EshopCommunity\Tests\Unit\Internal;
 
 use OxidEsales\EshopCommunity\Internal\Utility\ContextInterface;
 
-class ContextStub implements ContextInterface
+class ContextStub extends BasicContextStub implements ContextInterface
 {
     private $logLevel = 'error';
 
@@ -16,14 +16,18 @@ class ContextStub implements ContextInterface
 
     private $currentShopId = 1;
 
-    private $shopDir = '/tmp';
-
-    private $containerCacheFile = '/tmp/containercache.php';
-
     /**
      * @var array
      */
-    private $requiredContactFormFields;
+    private $requiredContactFormFields = [];
+
+    /**
+     * @return string
+     */
+    public function getEnvironment(): string
+    {
+        return 'dev';
+    }
 
     /**
      * @param string $logLevel
@@ -44,7 +48,7 @@ class ContextStub implements ContextInterface
     /**
      * @return string
      */
-    public function getLogLevel()
+    public function getLogLevel(): string
     {
         return $this->logLevel;
     }
@@ -52,7 +56,7 @@ class ContextStub implements ContextInterface
     /**
      * @return string
      */
-    public function getLogFilePath()
+    public function getLogFilePath(): string
     {
         return $this->logFilePath;
     }
@@ -60,7 +64,7 @@ class ContextStub implements ContextInterface
     /**
      * @return array
      */
-    public function getRequiredContactFormFields()
+    public function getRequiredContactFormFields(): array
     {
         return $this->requiredContactFormFields;
     }
@@ -84,25 +88,17 @@ class ContextStub implements ContextInterface
     /**
      * @return int
      */
-    public function getCurrentShopId()
+    public function getCurrentShopId(): int
     {
         return $this->currentShopId;
     }
 
     /**
-     * @param string $shopDir
-     */
-    public function setShopDir($shopDir)
-    {
-        $this->shopDir = $shopDir;
-    }
-
-    /**
      * @return string
      */
-    public function getShopDir()
+    public function getConfigurationEncryptionKey(): string
     {
-        return $this->shopDir;
+        return '';
     }
 
     /**
@@ -110,14 +106,40 @@ class ContextStub implements ContextInterface
      */
     public function getContainerCacheFile(): string
     {
-        return $this->containerCacheFile;
+        return '';
+    }
+
+
+    /**
+     * @return integer
+     */
+    public function getPasswordHashingBcryptCost(): int
+    {
+        /** The 'cost' option defines the CPU cost of hash generation. For testing the minimal possible value is chosen */
+        return 4;
     }
 
     /**
-     * @param string $containerCacheFile
+     * @return int
      */
-    public function setContainerCacheFile(string $containerCacheFile)
+    public function getPasswordHashingArgon2MemoryCost(): int
     {
-        $this->containerCacheFile = $containerCacheFile;
+        return 1024;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPasswordHashingArgon2TimeCost(): int
+    {
+        return 2;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPasswordHashingArgon2Threads(): int
+    {
+        return 2;
     }
 }

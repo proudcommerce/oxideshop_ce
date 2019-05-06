@@ -7,13 +7,10 @@
 namespace OxidEsales\EshopCommunity\Application\Model;
 
 use Exception;
-use oxDb;
 use oxField;
+use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
 use oxList;
-use oxPrice;
-use oxRegistry;
-use oxSeoEncoderArticle;
 
 // defining supported link types
 define('OXARTICLE_LINKTYPE_CATEGORY', 0);
@@ -466,6 +463,13 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
     protected $_blCanUpdateAnyField = null;
 
     /**
+     * Triggered action type
+     *
+     * @var integer
+     */
+    protected $actionType = ACTION_NA;
+
+    /**
      * Constructor, sets shop ID for article (\OxidEsales\Eshop\Core\Config::getShopId()),
      * initiates parent constructor (parent::oxI18n()).
      *
@@ -677,6 +681,17 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
     public function getSqlActiveSnippet($blForceCoreTable = null)
     {
         return "( {$this->_createSqlActiveSnippet($blForceCoreTable)} ) ";
+    }
+
+    /**
+     *
+     * Getter for action type.
+     *
+     * @return int
+     */
+    public function getActionType()
+    {
+        return $this->actionType;
     }
 
     /**
@@ -1169,7 +1184,9 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
         $blChanged = false;
         foreach ($aSortingFields as $sField) {
             $sParameterName = 'oxarticles__' . $sField;
-            if ($this->$sParameterName->value !== $this->_aSortingFieldsOnLoad[$sParameterName]) {
+            $currentValueOfField = $this->$sParameterName instanceof Field ? $this->$sParameterName->value : '';
+            $valueOfFieldOnLoad = $this->_aSortingFieldsOnLoad[$sParameterName] ?? null;
+            if ($valueOfFieldOnLoad !== $currentValueOfField) {
                 $blChanged = true;
                 break;
             }
@@ -2170,6 +2187,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
      */
     public function reduceStock($dAmount, $blAllowNegativeStock = false)
     {
+        $this->actionType = ACTION_UPDATE_STOCK;
         $this->beforeUpdate();
 
         $database = \OxidEsales\Eshop\Core\DatabaseProvider::getDb();
@@ -2372,7 +2390,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
             if (!isset($articleId)) {
                 $articleId = $this->oxarticles__oxid->value;
             }
-            if ($this->oxarticles__oxparentid->value) {
+            if ($this->oxarticles__oxparentid && $this->oxarticles__oxparentid->value) {
                 $parentArticleId = $this->oxarticles__oxparentid->value;
             }
         }
@@ -2411,6 +2429,8 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
             $this->_assignStock();
             $this->_onChangeStockResetCount($articleId);
         }
+
+        $this->dispatchEvent(new \OxidEsales\EshopCommunity\Internal\ShopEvents\AfterModelUpdateEvent($this));
     }
 
     /**
@@ -2508,7 +2528,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
 
             if ($sDbValue != false) {
                 $this->_oLongDesc->setValue($sDbValue, \OxidEsales\Eshop\Core\Field::T_RAW);
-            } elseif ($this->oxarticles__oxparentid->value) {
+            } elseif ($this->oxarticles__oxparentid && $this->oxarticles__oxparentid->value) {
                 if (!$this->isAdmin() || $this->_blLoadParentData) {
                     $oParent = $this->getParentArticle();
                     if ($oParent) {
@@ -2868,6 +2888,16 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
     }
 
     /**
+     * Get stock status as it was on loading this object.
+     *
+     * @return integer
+     */
+    public function getStockStatusOnLoad()
+    {
+        return $this->_iStockStatusOnLoad;
+    }
+
+    /**
      * Get stock
      *
      * @return float
@@ -3126,7 +3156,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
      */
     public function getParentArticle()
     {
-        if (($sParentId = $this->oxarticles__oxparentid->value)) {
+        if ($this->oxarticles__oxparentid && ($sParentId = $this->oxarticles__oxparentid->value)) {
             $sIndex = $sParentId . "_" . $this->getLanguage();
             if (!isset(self::$_aLoadedParents[$sIndex])) {
                 self::$_aLoadedParents[$sIndex] = oxNew(\OxidEsales\Eshop\Application\Model\Article::class);
@@ -3182,7 +3212,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
      */
     public function getParentId()
     {
-        return $this->oxarticles__oxparentid->value;
+        return $this->oxarticles__oxparentid instanceof Field ? $this->oxarticles__oxparentid->value : '';
     }
 
     /**
@@ -3200,9 +3230,14 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
      *
      * @return bool
      */
-    public function isVariant()
+    public function isVariant(): bool
     {
-        return (bool) (isset($this->oxarticles__oxparentid) ? $this->oxarticles__oxparentid->value : false);
+        $isVariant = false;
+        if (isset($this->oxarticles__oxparentid) && false !== $this->oxarticles__oxparentid) {
+            $isVariant = (bool) $this->oxarticles__oxparentid->value;
+        }
+
+        return $isVariant;
     }
 
     /**
@@ -4693,7 +4728,7 @@ class Article extends \OxidEsales\Eshop\Core\Model\MultiLanguageModel implements
                 WHERE ' . $this->getSqlActiveSnippet(true) . '
                     AND ( `oxarticles`.`oxparentid` = ' . $database->quote($sParentId) . ' )';
             $aPrices = $database->getRow($sQ);
-            if (!is_null($aPrices['varminprice']) || !is_null($aPrices['varmaxprice'])) {
+            if (isset($aPrices['varminprice'], $aPrices['varmaxprice'])) {
                 $sQ = '
                     UPDATE `oxarticles`
                     SET

@@ -1389,20 +1389,6 @@ abstract class DatabaseInterfaceImplementationTest extends DatabaseInterfaceImpl
     }
 
     /**
-     * Fetch all the rows of the oxdoctrinetest table.
-     *
-     * @return array All rows of the oxdoctrinetest table.
-     */
-    protected function fetchAllTestTableRows()
-    {
-        $masterDb = oxDb::getMaster();
-
-        return $masterDb
-            ->select('SELECT * FROM ' . self::TABLE_NAME, array())
-            ->fetchAll();
-    }
-
-    /**
      * Fetch the oxId of the first oxdoctrinetest table row.
      *
      * @return array|false The oxId of the first oxdoctrinetest table row.
@@ -1425,17 +1411,6 @@ abstract class DatabaseInterfaceImplementationTest extends DatabaseInterfaceImpl
     protected function isEmptyTestTable()
     {
         return empty($this->fetchAllTestTableRows());
-    }
-
-    /**
-     * Helper methods to be used in all tests extending this class
-     */
-    /**
-     * Assure, that the table oxdoctrinetest is empty. If it is not empty, the test will fail.
-     */
-    protected function assureTestTableIsEmpty()
-    {
-        $this->assertEmpty($this->fetchAllTestTableRows(), "Table '" . self::TABLE_NAME . "' is empty");
     }
 
     /**

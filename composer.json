@@ -4,10 +4,7 @@
     "type": "oxideshop",
     "keywords": ["oxid", "modules", "eShop"],
     "homepage": "https://www.oxid-esales.com/en/home.html",
-    "license": [
-        "GPL-3.0-only",
-        "proprietary"
-    ],
+    "license": "GPL-3.0-only",
     "require": {
         "php": "^7.0",
         "phpmailer/phpmailer": "^v6.0.6",
@@ -18,6 +15,7 @@
         "psr/container": "1.0.*",
         "symfony/event-dispatcher": "^3.4",
         "symfony/dependency-injection": "^3.4",
+        "symfony/lock": "^3.4",
         "symfony/console": "^v3.4.15",
         "webmozart/path-util": "^2.3"
     },

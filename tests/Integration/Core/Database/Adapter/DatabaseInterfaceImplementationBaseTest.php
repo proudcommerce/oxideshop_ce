@@ -101,7 +101,8 @@ abstract class DatabaseInterfaceImplementationBaseTest extends UnitTestCase
         parent::setUp();
 
         $this->initializeDatabase();
-        // $this->assureTestTableIsEmpty();
+        $this->truncateTestTable();
+        $this->assureTestTableIsEmpty();
     }
 
     /**
@@ -260,5 +261,15 @@ abstract class DatabaseInterfaceImplementationBaseTest extends UnitTestCase
     {
         $this->assertTrue(isset($object->$attributeName), 'Missing field "' . $attributeName . '".');
         $this->assertSame($attributeValue, $object->$attributeName);
+    }
+
+    protected function assureTestTableIsEmpty()
+    {
+        $this->assertEmpty($this->fetchAllTestTableRows(), "Table '" . self::TABLE_NAME . "' is empty");
+    }
+
+    protected function fetchAllTestTableRows()
+    {
+        return $this->database->select('SELECT * FROM ' . self::TABLE_NAME)->fetchAll();
     }
 }

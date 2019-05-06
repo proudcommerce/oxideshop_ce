@@ -20,12 +20,16 @@ abstract class AcceptanceTestCase extends \OxidEsales\TestingLibrary\AcceptanceT
     protected function setUp()
     {
         parent::setUp();
+        $this->activateTheme('azure');
 
         //Suppress check for new module versions on every admin login
         if ($this->preventModuleVersionNotify) {
             $aParams = array("type" => "bool", "value" => true);
             $this->callShopSC("oxConfig", null, null, array('preventModuleVersionNotify' => $aParams));
         }
+
+        $this->activateTheme('azure');
+        $this->clearCache();
     }
 
     /**
@@ -34,7 +38,6 @@ abstract class AcceptanceTestCase extends \OxidEsales\TestingLibrary\AcceptanceT
     public function setUpTestsSuite($testSuitePath)
     {
         parent::setUpTestsSuite($testSuitePath);
-        $this->activateTheme('azure');
     }
 
     /**

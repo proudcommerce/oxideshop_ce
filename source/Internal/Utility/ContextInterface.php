@@ -6,28 +6,65 @@
 
 namespace OxidEsales\EshopCommunity\Internal\Utility;
 
+use OxidEsales\EshopCommunity\Internal\Application\Utility\BasicContextInterface;
+
 /**
  * @internal
  */
-interface ContextInterface
+interface ContextInterface extends BasicContextInterface
 {
     /**
      * @return string
      */
-    public function getLogLevel();
-
-    /**
-     * @return string
-     */
-    public function getLogFilePath();
-
-    /**
-     * @return array
-     */
-    public function getRequiredContactFormFields();
+    public function getEnvironment(): string;
 
     /**
      * @return int
      */
-    public function getCurrentShopId();
+    public function getCurrentShopId(): int;
+
+    /**
+     * @return string
+     */
+    public function getContainerCacheFile(): string;
+
+    /**
+     * @return string
+     */
+    public function getLogLevel(): string;
+
+    /**
+     * @return string
+     */
+    public function getLogFilePath(): string;
+
+    /**
+     * @return array
+     */
+    public function getRequiredContactFormFields(): array;
+
+    /**
+     * @return string
+     */
+    public function getConfigurationEncryptionKey(): string;
+
+    /**
+     * @return integer
+     */
+    public function getPasswordHashingBcryptCost(): int;
+
+    /**
+     * @return int
+     */
+    public function getPasswordHashingArgon2MemoryCost(): int;
+
+    /**
+     * @return int
+     */
+    public function getPasswordHashingArgon2TimeCost(): int;
+
+    /**
+     * @return int
+     */
+    public function getPasswordHashingArgon2Threads(): int;
 }

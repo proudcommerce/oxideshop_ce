@@ -3,10 +3,8 @@ services:
     autowire: true
     public: false
 
-  event_dispatcher:
+  Symfony\Component\EventDispatcher\EventDispatcherInterface:
     class: OxidEsales\EshopCommunity\Internal\Application\Events\ShopAwareEventDispatcher
-    arguments:
-      $container: '@service_container'
     public: true
 
   OxidEsales\EshopCommunity\Internal\Application\Events\ConfigurationChangedEventSubscriber:

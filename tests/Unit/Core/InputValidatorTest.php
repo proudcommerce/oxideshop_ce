@@ -769,6 +769,7 @@ class InputValidatorTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $user->setId("testlalaa_");
 
         $user->oxuser__oxpassword = new Field('a@a.a', Field::T_RAW);
+        $user->oxuser__oxpasssalt = new Field(md5('salt'), Field::T_RAW);
         $user->oxuser__oxusername = new Field('b@b.b', Field::T_RAW);
 
         $invoiceAdress['oxuser__oxusername'] = 'a@a.a';
@@ -943,22 +944,6 @@ class InputValidatorTest extends \OxidEsales\TestingLibrary\UnitTestCase
 
         $iErrorNumber = $this->_getAccountNumberErrorNo();
         $this->assertSame($iErrorNumber, $oValidationResult, 'Should validate as bank code error.');
-    }
-
-    /**
-     * Testing validatePaymentInputData with BankCodeEmpty and AccountNumberSepaCorrect
-     * expecting True
-     */
-    public function testValidatePaymentInputData_BankCodeEmptyAccountNumberSepaCorrect_True()
-    {
-        $sAccountNumber = $this->_getSepaAccountNumber();
-
-        $aDynValue = $this->_getBankData('', $sAccountNumber);
-
-        $oValidator = oxNew('oxInputValidator');
-        $oValidationResult = $oValidator->validatePaymentInputData("oxiddebitnote", $aDynValue);
-
-        $this->assertTrue($oValidationResult, 'Should validate as true.');
     }
 
     /**
@@ -1216,5 +1201,4 @@ class InputValidatorTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $this->assertSame(1, count($aCheckers));
         $this->assertFalse($aCheckers[0] instanceof \OxidEsales\EshopCommunity\Core\OnlineVatIdCheck);
     }
-
 }

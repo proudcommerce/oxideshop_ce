@@ -48,7 +48,9 @@ class MyAccountFrontendTest extends FrontendTestCase
         $this->assertEquals("%YOU_ARE_HERE%: / %MY_ACCOUNT% - example_test@oxid-esales.dev", $this->getText("breadCrumb"));
         $this->clickAndWait("link=%HOME%");
         $this->assertElementNotPresent("breadCrumb");
+        $this->assertEquals("%GREETING%UserNamešÄßüл UserSurnamešÄßüл %LOGOUT%", $this->clearString($this->getText("//ul[@id='topMenu']/li[1]")));
         $this->clickAndWait("//ul[@id='topMenu']/li[1]/a");
+        $this->assertElementPresent("breadCrumb");
         $this->assertEquals("%YOU_ARE_HERE%: / %MY_ACCOUNT% - example_test@oxid-esales.dev", $this->getText("breadCrumb"));
         $this->assertElementPresent("//ul[@id='topMenu']//a[text()='%LOGOUT%']");
     }
@@ -156,9 +158,9 @@ class MyAccountFrontendTest extends FrontendTestCase
 
         //correct new pass
         $this->type("passwordOld", "useruser");
-        $this->type("password_new", "user1user");
+        $this->type("password_new", "NEW_PASSWORD");
         $this->fireEvent("password_new", "blur");
-        $this->type("password_new_confirm", "user1user");
+        $this->type("password_new_confirm", "NEW_PASSWORD");
         $this->fireEvent("password_new_confirm", "blur");
         $this->clickAndWait("savePass");
         $this->assertFalse($this->isVisible("//span[text()='%ERROR_MESSAGE_PASSWORD_TOO_SHORT%']"));
@@ -169,7 +171,7 @@ class MyAccountFrontendTest extends FrontendTestCase
         $this->assertTextNotPresent("%ERROR_MESSAGE_USER_NOVALIDLOGIN%");
         $this->loginInFrontend("example_test@oxid-esales.dev", "useruser", false);
         $this->assertTextPresent("%ERROR_MESSAGE_USER_NOVALIDLOGIN%");
-        $this->loginInFrontend("example_test@oxid-esales.dev", "user1user");
+        $this->loginInFrontend("example_test@oxid-esales.dev", "NEW_PASSWORD");
         $this->assertEquals("UserNamešÄßüл UserSurnamešÄßüл", $this->clearString($this->getText("//ul[@id='topMenu']/li[1]/a[1]")));
 
         $this->click("servicesTrigger");

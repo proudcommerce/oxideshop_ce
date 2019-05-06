@@ -209,9 +209,15 @@ class Session extends \OxidEsales\Eshop\Core\Base
 
     /**
      * Starts shop session, generates unique session ID, extracts user IP.
+     *
+     * @return void
      */
     public function start()
     {
+        if ($this->isSessionStarted()) {
+            return;
+        }
+
         $myConfig = \OxidEsales\Eshop\Core\Registry::getConfig();
 
         if ($this->isAdmin()) {

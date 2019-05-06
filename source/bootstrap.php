@@ -4,30 +4,14 @@
  * See LICENSE file for license details.
  */
 
-error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
-ini_set('display_errors', 0);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+ini_set('display_errors', '0');
 
 define('INSTALLATION_ROOT_PATH', dirname(__DIR__));
 define('OX_BASE_PATH', INSTALLATION_ROOT_PATH . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR);
 define('OX_LOG_FILE', OX_BASE_PATH . 'log' . DIRECTORY_SEPARATOR . 'oxideshop.log');
 define('OX_OFFLINE_FILE', OX_BASE_PATH . 'offline.html');
 define('VENDOR_PATH', INSTALLATION_ROOT_PATH . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR);
-
-/**
- * Where CORE_AUTOLOADER_PATH points depends on how OXID eShop has been installed. If it is installed as part of a
- * compilation, the directory 'Core', where the auto load classes are located, does not reside inside OX_BASE_PATH,
- * but inside VENDOR_PATH.
- */
-if (!is_dir(OX_BASE_PATH . 'Core')) {
-    define('CORE_AUTOLOADER_PATH', VENDOR_PATH .
-                                   'oxid-esales' . DIRECTORY_SEPARATOR .
-                                   'oxideshop-ce' . DIRECTORY_SEPARATOR .
-                                   'source' . DIRECTORY_SEPARATOR .
-                                   'Core' . DIRECTORY_SEPARATOR .
-                                   'Autoload' . DIRECTORY_SEPARATOR);
-} else {
-    define('CORE_AUTOLOADER_PATH', OX_BASE_PATH . 'Core' . DIRECTORY_SEPARATOR . 'Autoload' . DIRECTORY_SEPARATOR);
-}
 
 /**
  * Provide a handler for catchable fatal errors, like failed requirement of files.
@@ -126,8 +110,8 @@ unset($configMissing);
  */
 $bootstrapConfigFileReader = new \BootstrapConfigFileReader();
 if ($bootstrapConfigFileReader->isDebugMode()) {
-    ini_set('display_errors', 'On');
-    error_reporting(E_ALL ^ E_DEPRECATED);
+    ini_set('display_errors', '1');
+    error_reporting(E_ALL & ~E_DEPRECATED);
 }
 unset($bootstrapConfigFileReader);
 
@@ -142,6 +126,20 @@ unset($bootstrapConfigFileReader);
  * It will always come first, even if you move it after the other autoloaders as it registers itself with prepend = true
  */
 require_once VENDOR_PATH . 'autoload.php';
+
+/**
+ * Where CORE_AUTOLOADER_PATH points depends on how OXID eShop has been installed. If it is installed as part of a
+ * compilation, the directory 'Core', where the auto load classes are located, does not reside inside OX_BASE_PATH,
+ * but inside VENDOR_PATH.
+ */
+if (!is_dir(OX_BASE_PATH . 'Core')) {
+    define('CORE_AUTOLOADER_PATH', (new \OxidEsales\Facts\Facts)->getCommunityEditionSourcePath() .
+            DIRECTORY_SEPARATOR .
+            'Core' . DIRECTORY_SEPARATOR .
+            'Autoload' . DIRECTORY_SEPARATOR);
+} else {
+    define('CORE_AUTOLOADER_PATH', OX_BASE_PATH . 'Core' . DIRECTORY_SEPARATOR . 'Autoload' . DIRECTORY_SEPARATOR);
+}
 
 /*
  * Register the backwards compatibility autoloader.
@@ -210,9 +208,7 @@ ini_set('url_rewriter.tags', '');
 function oxTriggerOfflinePageDisplay()
 {
     // Do not display the offline page, if this running in CLI mode
-    if ('cli' === strtolower(php_sapi_name())) {
-        echo 'Uncaught exception. See error log for more information.' . PHP_EOL;
-    } else {
+    if ('cli' !== strtolower(php_sapi_name())) {
         header("HTTP/1.1 500 Internal Server Error");
         header("Connection: close");
 
@@ -221,7 +217,7 @@ function oxTriggerOfflinePageDisplay()
          * If offline.php exists its content is displayed.
          * Like this the error message is overridable within that file.
          */
-        if (file_exists(OX_OFFLINE_FILE) && is_readable(OX_OFFLINE_FILE)) {
+        if (is_readable(OX_OFFLINE_FILE)) {
             echo file_get_contents(OX_OFFLINE_FILE);
         };
     }

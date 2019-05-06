@@ -14,6 +14,8 @@ use oxOutput;
 use oxSystemComponentException;
 use PHPMailer\PHPMailer\PHPMailer;
 use ReflectionMethod;
+use OxidEsales\EshopCommunity\Internal\ShopEvents\ViewRenderedEvent;
+use OxidEsales\EshopCommunity\Internal\ShopEvents\BeforeHeadersSendEvent;
 
 /**
  * Main shop actions controller. Processes user actions, logs
@@ -275,6 +277,8 @@ class ShopControl extends \OxidEsales\Eshop\Core\Base
 
         $output = $this->formOutput($view);
 
+        $this->dispatchEvent(new ViewRenderedEvent($this));
+
         $outputManager = $this->_getOutputManager();
         $outputManager->setCharset($view->getCharSet());
 
@@ -283,7 +287,13 @@ class ShopControl extends \OxidEsales\Eshop\Core\Base
             $outputManager->output('errors', $this->_getFormattedErrors($view->getClassName()));
         }
 
+        $this->dispatchEvent(new BeforeHeadersSendEvent($this, $view));
+
         $outputManager->sendHeaders();
+
+        //Send headers that have been registered
+        $header = \OxidEsales\Eshop\Core\Registry::get(\OxidEsales\Eshop\Core\Header::class);
+        $header->sendHeader();
 
         $this->sendAdditionalHeaders($view);
 
@@ -479,18 +489,32 @@ class ShopControl extends \OxidEsales\Eshop\Core\Base
         }
 
         foreach (array_keys($viewData) as $viewName) {
-            $smarty->assign_by_ref($viewName, $viewData[$viewName]);
+            $smarty->assign($viewName, $viewData[$viewName]);
         }
 
         // passing current view object to smarty
         $smarty->oxobject = $view;
 
-        $output = $smarty->fetch($templateName, $view->getViewId());
+        $output = $this->fetchSmartyOutput($smarty, $templateName, $view->getViewId());
 
         //Output processing - useful for modules as sometimes you may want to process output manually.
         $output = $outputManager->process($output, $view->getClassName());
 
         return $outputManager->addVersionTags($output);
+    }
+
+    /**
+     * Call smarty::fetch.
+     *
+     * @param Smarty $smarty
+     * @param string $templateName
+     * @param string $viewId
+     *
+     * @return mixed
+     */
+    protected function fetchSmartyOutput($smarty, $templateName, $viewId)
+    {
+        return $smarty->fetch($templateName, $viewId);
     }
 
     /**
